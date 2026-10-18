@@ -1,40 +1,66 @@
+import logging
 from contextlib import asynccontextmanager
-from os import sync
-from typing import AsyncGenerator
-from fastapi import FastAPI, Depends, status, Response
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError
+
+from app.core.config import DATABASE_URL
+from app.core.database import init_engine_and_sessionmaker
+from app.modules.autores.router import router as autores_router
+from app.modules.clientes.router import router as clientes_router
+from app.modules.editoriales.router import router as editoriales_router
+from app.modules.generos.router import router as generos_router
+from app.modules.health.router import router as health_router
+from app.modules.libros.router import router as libros_router
+from app.modules.ventas.router import router as ventas_router
+
+# Configuración básica de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
+logger = logging.getLogger("libreria.main")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    database = Database(DATABASE_URL)
-    engine = create_async_engine(DATABASE_URL, echo=True)
-
-    fabrica_sesiones = async_sessionmaker(bind=engine, expire_on_commit=False)
-
+    # Inicialización del motor asincrónico y fábrica de sesiones (Ejercicio 1)
+    engine, session_maker = init_engine_and_sessionmaker(DATABASE_URL)
     app.state.engine = engine
-    app.state.fabrica_sesiones = fabrica_sesiones
+    app.state.fabrica_sesiones = session_maker
+    logger.info("Motor asincrónico y fábrica de sesiones inicializados en app.state.")
 
     yield
 
-    await database.disconnect()
+    # Cierre ordenado y sin fugas de conexiones al apagar la aplicación
+    logger.info("Cerrando motor de base de datos...")
+    await engine.dispose()
+    logger.info("Motor de base de datos cerrado correctamente.")
 
-app = FastAPI(lifespan=lifespan)
 
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
-    async with app.state.fabrica_sesiones() as session:
-        yield session
+app = FastAPI(
+    title="Librería API",
+    description="API asincrónica con FastAPI, SQLModel y PostgreSQL - Programación III UTN",
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
-@app.get("/health/live", status_code=200)
-async def health_live():
-    return {"estado": "okey"}
 
-@app.get("/health/ready")
-async def health_ready(response: Response, session: AsyncSession = Depends(get_session)):
-    try:
-        await session.execute(text("SELECT 1"))
-        
-        return {"estado": "okey"}
-    except Exception as e:
-            response.status_code = 503
-            return {"estado": "error", "detalle": str(e)}
+# RN-12: Traducción global de IntegrityError a mensaje propio sin exponer trazas internas ni nombres de tablas
+@app.exception_handler(IntegrityError)
+async def integrity_error_handler(request: Request, exc: IntegrityError):
+    logger.warning(f"IntegrityError capturado en ruta {request.url.path}: {exc.orig}")
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={"detail": "Error de integridad: violación de restricción en la base de datos (unicidad o clave foránea)."}
+    )
+
+
+# Registro de todos los routers por módulo funcional (Consigna pág. 5 y 6)
+app.include_router(health_router)
+app.include_router(editoriales_router)
+app.include_router(generos_router)
+app.include_router(autores_router)
+app.include_router(libros_router)
+app.include_router(clientes_router)
+app.include_router(ventas_router)
