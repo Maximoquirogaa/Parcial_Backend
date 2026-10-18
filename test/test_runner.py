@@ -13,10 +13,13 @@ if str(BASE_DIR) not in sys.path:
 
 from httpx import AsyncClient, ASGITransport
 from app.main import app, lifespan
-
+from seed import seed_data
 
 
 async def run_all_tests():
+    # Asegurar un estado inicial conocido antes de ejecutar las pruebas
+    await seed_data()
+
     async with lifespan(app):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://127.0.0.1:8000") as client:
             print("\n" + "="*70)

@@ -152,7 +152,9 @@ python test/test_runner.py
 
 ## 5. Evidencia del Caso C-07 (Lecturas sin N+1)
 
-A continuación se adjunta el fragmento de la consola demostrando que las consultas de detalle ejecutan un **número fijo y constante de sentencias SQL**, independientemente de la cantidad de autores o renglones asociados:
+![Evidencia de consola Caso C-07](docs/evidencia_caso_c07.png)
+
+A continuación se adjunta también el fragmento textual de la consola demostrando que las consultas de detalle ejecutan un **número fijo y constante de sentencias SQL**, independientemente de la cantidad de autores o renglones asociados:
 
 ### A) Detalle de Libro (`GET /libros/3`) — Libro con 2 coautores
 * **Consulta 1:** Libro + `LEFT JOIN` con `editorial` y `genero` (relaciones a uno resueltas con `joinedload`):
