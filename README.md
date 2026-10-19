@@ -1,4 +1,4 @@
-# Librería API: Catálogo, Clientes y Ventas con FastAPI y PostgreSQL
+<img width="221" height="125" alt="image" src="https://github.com/user-attachments/assets/5880aae4-f26e-4d09-a7a4-27040e8ef4bf" /># Librería API: Catálogo, Clientes y Ventas con FastAPI y PostgreSQL
 
 Trabajo Práctico Integrador — Unidades 1 a 4: Del objeto a la persistencia.  
 **Materia:** Programación III  
@@ -152,7 +152,10 @@ python test/test_runner.py
 
 ## 5. Evidencia del Caso C-07 (Lecturas sin N+1)
 
-![Evidencia de consola Caso C-07](docs/evidencia_caso_c07.png)
+![Evidencia de consola Caso C-07]<img width="1304" height="441" alt="image" src="https://github.com/user-attachments/assets/0b1a81b9-1c60-4b74-89c6-7c721f4ccb34" />
+<img width="1303" height="564" alt="image" src="https://github.com/user-attachments/assets/d06ec008-d226-4056-aa98-fac061e2ffff" />
+
+
 
 A continuación se adjunta también el fragmento textual de la consola demostrando que las consultas de detalle ejecutan un **número fijo y constante de sentencias SQL**, independientemente de la cantidad de autores o renglones asociados:
 
@@ -167,6 +170,7 @@ LEFT OUTER JOIN editorial AS editorial_1 ON editorial_1.id = libro.editorial_id
 LEFT OUTER JOIN genero AS genero_1 ON genero_1.id = libro.genero_id 
 WHERE libro.id = $1::INTEGER;
 ```
+
 * **Consulta 2:** Colección de autorías con sus autores vinculados (relación a muchos resuelta con `selectinload` y `joinedload`):
 ```sql
 SELECT libro_autor.libro_id AS libro_autor_libro_id, libro_autor.autor_id AS libro_autor_autor_id, 
