@@ -3,7 +3,7 @@
 Trabajo Práctico Integrador — Unidades 1 a 4: Del objeto a la persistencia.  
 **Materia:** Programación III  
 **Carrera:** Tecnicatura Universitaria en Programación a Distancia — Universidad Tecnológica Nacional (UTN)
-
+**Integrantes** Máximo Quiroga, Santino Barone, Franco Rios y Fabrizio Simón
 ---
 
 ## 1. Descripción del Proyecto
